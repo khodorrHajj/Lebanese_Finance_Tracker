@@ -1,0 +1,83 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-liratrack_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local_database_password_32_chars_min}
+      POSTGRES_DB: ${POSTGRES_DB:-liratrack_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U liratrack_user -d liratrack_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.dev
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-liratrack_user}:${POSTGRES_PASSWORD:-local_database_password_32_chars_min}@db:5432/${POSTGRES_DB:-liratrack_db}
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000,http://localhost:3003,http://192.168.10.184:3000,http://192.168.10.184:3003
+      CSRF_TRUSTED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000,http://localhost:3003,http://192.168.10.184:3000,http://192.168.10.184:3003
+      OCR_WARMUP_ON_STARTUP: "false"
+    ports:
+      - "8000:8000"
+    volumes:
+      - type: bind
+        source: ./app
+        target: /app/app
+      - type: bind
+        source: ./alembic
+        target: /app/alembic
+      - type: bind
+        source: ./alembic.ini
+        target: /app/alembic.ini
+      - type: bind
+        source: ./.env
+        target: /app/.env
+      - type: volume
+        source: backend_paddlex
+        target: /root/.paddlex
+      - type: volume
+        source: backend_huggingface
+        target: /root/.cache/huggingface
+      - type: volume
+        source: backend_modelscope
+        target: /root/.cache/modelscope
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    environment:
+      NEXT_PUBLIC_API_URL: http://192.168.10.184:8000/api/v1
+    ports:
+      - "3000:3000"
+    volumes:
+      - type: bind
+        source: ./frontend
+        target: /app
+      - type: volume
+        source: frontend_node_modules
+        target: /app/node_modules
+      - type: volume
+        source: frontend_next
+        target: /app/.next
+    depends_on:
+      backend:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  frontend_node_modules:
+  frontend_next:
+  backend_paddlex:
+  backend_huggingface:
+  backend_modelscope:

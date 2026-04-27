@@ -1,0 +1,22 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+alembic
+psycopg2-binary
+pydantic[email]
+python-dotenv
+PyJWT
+phonenumbers
+passlib[bcrypt]
+bcrypt>=4.0.0,<4.1
+pyotp
+qrcode[pil]
+httpx
+apscheduler
+yfinance
+python-multipart
+
+# Lightweight OCR
+paddlepaddle==3.2.2
+paddleocr==3.3.3
+opencv-python

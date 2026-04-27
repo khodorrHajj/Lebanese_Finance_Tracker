@@ -1,0 +1,11 @@
+venv/
+uploads/
+.env
+.claude/
+frontend/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+.git
