@@ -128,6 +128,4 @@ LiraTrack includes:
 - security headers for browser protection
 - production startup validation for required configuration
 
-## Status
 
-This project is a portfolio project and demonstrates a complete full-stack finance product: authentication, financial data modeling, exchange-rate handling, OCR, recurring schedules, responsive UI, bilingual support, and containerized deployment.
