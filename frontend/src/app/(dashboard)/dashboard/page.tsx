@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+import { Skeleton } from "@/components/Skeleton";
 import { AddCategoryModal } from "@/components/AddCategoryModal";
 import { AddTransactionModal } from "@/components/AddTransactionModal";
 import { AddWalletModal } from "@/components/AddWalletModal";
@@ -687,92 +688,93 @@ export default function DashboardPage() {
       ) : null}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <DashboardCard
-          title={moneyViewLabels.usdWalletsTotal}
-          value={
-            loading
-              ? t("loading_dashboard", locale)
-              : formatUsd(netWorth?.total_usd, locale)
-          }
-          tone={toNumber(netWorth?.total_usd) >= 0 ? "success" : "danger"}
-          icon={<Wallet className="h-5 w-5" />}
-          subtitle={moneyViewLabels.usdWalletsSubtitle}
-          onIconClick={() => router.push("/wallets")}
-          iconLabel={t("wallets", locale)}
-        />
-        <DashboardCard
-          title={moneyViewLabels.lbpWalletsTotal}
-          value={
-            loading
-              ? t("loading_dashboard", locale)
-              : formatLbp(netWorth?.total_lbp, locale)
-          }
-          tone={toNumber(netWorth?.total_lbp) >= 0 ? "success" : "danger"}
-          icon={<Wallet className="h-5 w-5" />}
-          subtitle={moneyViewLabels.lbpWalletsSubtitle}
-          onIconClick={() => router.push("/wallets")}
-          iconLabel={t("wallets", locale)}
-        />
-        <DashboardCard
-          title={moneyViewLabels.netWorthUsd}
-          value={
-            loading
-              ? t("loading_dashboard", locale)
-              : formatUsd(netWorth?.total_net_worth_usd, locale)
-          }
-          tone={toNumber(netWorth?.total_net_worth_usd) >= 0 ? "success" : "danger"}
-          icon={<Wallet className="h-5 w-5" />}
-          subtitle={moneyViewLabels.netWorthSubtitle}
-          onIconClick={() => router.push("/wallets")}
-          iconLabel={t("wallets", locale)}
-        />
-        <DashboardCard
-          title={moneyViewLabels.rateUsed}
-          value={
-            loading
-              ? t("loading_dashboard", locale)
-              : netWorth?.latest_rate
-                ? formatLbp(netWorth.latest_rate, locale)
-                : t("rate_unavailable", locale)
-          }
-          icon={
-            <RefreshCw
-              className={`h-5 w-5 ${isRefreshingRate ? "animate-spin" : ""}`}
-            />
-          }
-          subtitle={
-            loading
-              ? moneyViewLabels.rateUsedSubtitle
-              : `${moneyViewLabels.rateUsedSubtitle} - ${rateStatusText} (${rateStatusRelative})`
-          }
-          onIconClick={() => void handleRefreshRate()}
-          iconLabel={t("refresh_rate", locale)}
-        />
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <section
+                key={i}
+                className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm"
+              >
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-9 w-9 rounded-xl" />
+                </div>
+                <Skeleton className="mt-6 h-9 w-36" />
+                <Skeleton className="mt-2 h-4 w-48" />
+              </section>
+            ))
+          : <>
+              <DashboardCard
+                title={moneyViewLabels.usdWalletsTotal}
+                value={formatUsd(netWorth?.total_usd, locale)}
+                tone={toNumber(netWorth?.total_usd) >= 0 ? "success" : "danger"}
+                icon={<Wallet className="h-5 w-5" />}
+                subtitle={moneyViewLabels.usdWalletsSubtitle}
+                onIconClick={() => router.push("/wallets")}
+                iconLabel={t("wallets", locale)}
+              />
+              <DashboardCard
+                title={moneyViewLabels.lbpWalletsTotal}
+                value={formatLbp(netWorth?.total_lbp, locale)}
+                tone={toNumber(netWorth?.total_lbp) >= 0 ? "success" : "danger"}
+                icon={<Wallet className="h-5 w-5" />}
+                subtitle={moneyViewLabels.lbpWalletsSubtitle}
+                onIconClick={() => router.push("/wallets")}
+                iconLabel={t("wallets", locale)}
+              />
+              <DashboardCard
+                title={moneyViewLabels.netWorthUsd}
+                value={formatUsd(netWorth?.total_net_worth_usd, locale)}
+                tone={toNumber(netWorth?.total_net_worth_usd) >= 0 ? "success" : "danger"}
+                icon={<Wallet className="h-5 w-5" />}
+                subtitle={moneyViewLabels.netWorthSubtitle}
+                onIconClick={() => router.push("/wallets")}
+                iconLabel={t("wallets", locale)}
+              />
+              <DashboardCard
+                title={moneyViewLabels.rateUsed}
+                value={netWorth?.latest_rate ? formatLbp(netWorth.latest_rate, locale) : t("rate_unavailable", locale)}
+                icon={
+                  <RefreshCw
+                    className={`h-5 w-5 ${isRefreshingRate ? "animate-spin" : ""}`}
+                  />
+                }
+                subtitle={`${moneyViewLabels.rateUsedSubtitle} - ${rateStatusText} (${rateStatusRelative})`}
+                onIconClick={() => void handleRefreshRate()}
+                iconLabel={t("refresh_rate", locale)}
+              />
+            </>}
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
-        <DashboardCard
-          title={t("projected_savings", locale)}
-          value={
-            loading
-              ? t("loading_dashboard", locale)
-              : formatUsd(forecast?.projected_savings, locale)
-          }
-          tone={
-            projectedSavings > 0
-              ? "success"
-              : projectedSavings < 0
-                ? "danger"
-                : "default"
-          }
-          icon={
-            projectedSavings < 0 ? (
-              <TrendingDown className="h-5 w-5" />
-            ) : (
-              <TrendingUp className="h-5 w-5" />
-            )
-          }
-        />
+        {loading ? (
+          <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-9 w-9 rounded-xl" />
+            </div>
+            <Skeleton className="mt-6 h-9 w-36" />
+            <Skeleton className="mt-2 h-4 w-48" />
+          </section>
+        ) : (
+          <DashboardCard
+            title={t("projected_savings", locale)}
+            value={formatUsd(forecast?.projected_savings, locale)}
+            tone={
+              projectedSavings > 0
+                ? "success"
+                : projectedSavings < 0
+                  ? "danger"
+                  : "default"
+            }
+            icon={
+              projectedSavings < 0 ? (
+                <TrendingDown className="h-5 w-5" />
+              ) : (
+                <TrendingUp className="h-5 w-5" />
+              )
+            }
+          />
+        )}
       </section>
 
       <section className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
@@ -798,11 +800,24 @@ export default function DashboardPage() {
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {loading ? (
-            <div className="rounded-2xl border border-dashed border-[var(--border)] bg-slate-50 px-4 py-10 text-center text-sm text-[var(--muted)] md:col-span-2 xl:col-span-3">
-              {t("loading_dashboard", locale)}
-            </div>
-          ) : null}
+          {loading
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <article
+                  key={i}
+                  className="rounded-2xl border border-[var(--border)] bg-white p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-5 w-32" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                    <Skeleton className="h-9 w-9 rounded-xl" />
+                  </div>
+                  <Skeleton className="mt-5 h-8 w-28" />
+                  <Skeleton className="mt-2 h-4 w-40" />
+                </article>
+              ))
+            : null}
 
           {!loading && walletCards.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-[var(--border)] bg-slate-50 px-4 py-10 text-center text-sm text-[var(--muted)] md:col-span-2 xl:col-span-3">
@@ -893,40 +908,60 @@ export default function DashboardPage() {
         </div>
 
         <div className="mt-6 space-y-3">
+          {loading
+            ? Array.from({ length: 5 }).map((_, i) => (
+                <article
+                  key={i}
+                  className="flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-white p-4 md:flex-row md:items-center md:justify-between"
+                >
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-5 w-48" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  <div className="space-y-2 md:text-right">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-5 w-20" />
+                  </div>
+                </article>
+              ))
+            : null}
+
           {recentTransactions.length === 0 && !loading ? (
             <div className="rounded-2xl border border-dashed border-[var(--border)] bg-slate-50 px-4 py-10 text-center text-sm text-[var(--muted)]">
               {t("no_transactions_found", locale)}
             </div>
           ) : null}
 
-          {recentTransactions.map((transaction) => (
-            <article
-              key={transaction.id}
-              className="flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-white p-4 md:flex-row md:items-center md:justify-between"
-            >
-              <div>
-                <p className="text-sm font-semibold text-slate-900">
-                  {transaction.description || t("no_description", locale)}
-                </p>
-                <p className="mt-1 text-sm text-[var(--muted)]">
-                  {transaction.category
-                    ? locale === "ar"
-                      ? transaction.category.name_ar
-                      : transaction.category.name_en
-                    : t("uncategorized", locale)}
-                </p>
-              </div>
+          {!loading
+            ? recentTransactions.map((transaction) => (
+                <article
+                  key={transaction.id}
+                  className="flex flex-col gap-3 rounded-2xl border border-[var(--border)] bg-white p-4 md:flex-row md:items-center md:justify-between"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">
+                      {transaction.description || t("no_description", locale)}
+                    </p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">
+                      {transaction.category
+                        ? locale === "ar"
+                          ? transaction.category.name_ar
+                          : transaction.category.name_en
+                        : t("uncategorized", locale)}
+                    </p>
+                  </div>
 
-              <div className="text-sm text-slate-700 md:text-right">
-                <p>{formatDate(transaction.transaction_date, locale)}</p>
-                <p className="mt-1 font-semibold">
-                  {transaction.currency === "USD"
-                    ? formatUsd(transaction.amount, locale)
-                    : formatLbp(transaction.amount, locale)}
-                </p>
-              </div>
-            </article>
-          ))}
+                  <div className="text-sm text-slate-700 md:text-right">
+                    <p>{formatDate(transaction.transaction_date, locale)}</p>
+                    <p className="mt-1 font-semibold">
+                      {transaction.currency === "USD"
+                        ? formatUsd(transaction.amount, locale)
+                        : formatLbp(transaction.amount, locale)}
+                    </p>
+                  </div>
+                </article>
+              ))
+            : null}
         </div>
       </section>
     </div>

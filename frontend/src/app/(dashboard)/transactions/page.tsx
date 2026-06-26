@@ -12,6 +12,7 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
+import { Skeleton } from "@/components/Skeleton";
 
 import { AddCategoryModal } from "@/components/AddCategoryModal";
 import { AddRecurringEventModal } from "@/components/AddRecurringEventModal";
@@ -522,8 +523,31 @@ export default function TransactionsPage() {
           </div>
 
           {loading ? (
-            <div className="mt-6 rounded-2xl border border-dashed border-[var(--border)] bg-slate-50 px-4 py-10 text-center text-sm text-[var(--muted)]">
-              {t("loading_dashboard", locale)}
+            <div className="mt-6 rounded-2xl border border-[var(--border)] bg-white">
+              <table className="min-w-full divide-y divide-[var(--border)]">
+                <thead className="bg-slate-50">
+                  <tr>
+                    {[t("date", locale), t("description", locale), t("category", locale), t("amount", locale), t("currency", locale), t("status", locale), t("actions", locale)].map((header) => (
+                      <th key={header} className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+                        {header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border)] bg-white">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <tr key={i}>
+                      <td className="px-4 py-4"><Skeleton className="h-4 w-24" /></td>
+                      <td className="px-4 py-4 space-y-1"><Skeleton className="h-4 w-40" /><Skeleton className="h-3 w-20" /></td>
+                      <td className="px-4 py-4"><Skeleton className="h-4 w-20" /></td>
+                      <td className="px-4 py-4"><Skeleton className="h-4 w-16" /></td>
+                      <td className="px-4 py-4"><Skeleton className="h-4 w-12" /></td>
+                      <td className="px-4 py-4"><Skeleton className="h-5 w-16 rounded-full" /></td>
+                      <td className="px-4 py-4"><Skeleton className="h-4 w-8" /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ) : null}
 

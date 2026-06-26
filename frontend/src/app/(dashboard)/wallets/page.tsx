@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { Skeleton } from "@/components/Skeleton";
 import { AddWalletModal } from "@/components/AddWalletModal";
 import { useLanguage } from "@/context/LanguageContext";
 import { fetchWallets } from "@/lib/api";
@@ -113,8 +114,31 @@ export default function WalletsPage() {
         ) : null}
 
         {loading ? (
-          <div className="mt-6 rounded-2xl border border-dashed border-[var(--border)] bg-slate-50 px-4 py-10 text-center text-sm text-[var(--muted)]">
-            {t("loading_dashboard", locale)}
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-[var(--border)] bg-white p-5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-6 w-36" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                  <Skeleton className="h-6 w-16 rounded-full" />
+                </div>
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1">
+                    <Skeleton className="h-3 w-16" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                  <div className="space-y-1">
+                    <Skeleton className="h-3 w-16" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : null}
 

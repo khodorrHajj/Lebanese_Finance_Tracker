@@ -5,6 +5,7 @@ import { ArrowLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
+import { Skeleton } from "@/components/Skeleton";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useLanguage } from "@/context/LanguageContext";
 import {
@@ -256,8 +257,17 @@ export default function WalletDetailsPage() {
         ) : null}
 
         {loading ? (
-          <div className="mt-6 rounded-2xl border border-dashed border-[var(--border)] bg-slate-50 px-4 py-10 text-center text-sm text-[var(--muted)]">
-            {t("loading_dashboard", locale)}
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <article
+                key={i}
+                className="rounded-2xl border border-[var(--border)] bg-white p-5"
+              >
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="mt-3 h-8 w-36" />
+                {i === 3 ? <Skeleton className="mt-1 h-4 w-24" /> : null}
+              </article>
+            ))}
           </div>
         ) : null}
 

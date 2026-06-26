@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { Skeleton } from "@/components/Skeleton";
 import { ProfileTab } from "@/components/settings/ProfileTab";
 import { SecurityTab } from "@/components/settings/SecurityTab";
 import { getUserProfile } from "@/lib/api";
@@ -90,8 +91,25 @@ export default function SettingsPage() {
 
         <div>
           {loading ? (
-            <div className="rounded-2xl border border-dashed border-[var(--border)] bg-slate-50 px-4 py-10 text-center text-sm text-[var(--muted)]">
-              {t("loading_dashboard", locale)}
+            <div className="space-y-5">
+              <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+                <Skeleton className="h-6 w-40" />
+                <div className="mt-4 space-y-4">
+                  <div className="space-y-1">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full rounded-xl" />
+                  </div>
+                  <div className="space-y-1">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-10 w-full rounded-xl" />
+                  </div>
+                  <div className="space-y-1">
+                    <Skeleton className="h-4 w-16" />
+                    <Skeleton className="h-10 w-full rounded-xl" />
+                  </div>
+                  <Skeleton className="h-10 w-28 rounded-xl" />
+                </div>
+              </div>
             </div>
           ) : null}
 

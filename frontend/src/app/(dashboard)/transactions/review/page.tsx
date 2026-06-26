@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Check, ClipboardCheck, LoaderCircle } from "lucide-react";
 import Link from "next/link";
 
+import { Skeleton } from "@/components/Skeleton";
 import { useLanguage } from "@/context/LanguageContext";
 import {
   claimTransaction,
@@ -349,8 +350,34 @@ export default function ReviewTransactionsPage() {
       ) : null}
 
       {isLoading ? (
-        <div className="rounded-2xl border border-dashed border-[var(--border)] bg-slate-50 px-4 py-12 text-center text-sm text-[var(--muted)]">
-          {t("loading_dashboard", locale)}
+        <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
+          <aside className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4 shadow-sm">
+            <div className="flex items-center justify-between gap-3">
+              <Skeleton className="h-5 w-16" />
+              <Skeleton className="h-5 w-10 rounded-full" />
+            </div>
+            <div className="mt-4 space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="rounded-xl border border-[var(--border)] bg-white p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 space-y-1">
+                      <Skeleton className="h-4 w-36" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                    <Skeleton className="h-5 w-12 rounded-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </aside>
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
+            <div className="space-y-4">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-10 w-32 rounded-xl" />
+            </div>
+          </div>
         </div>
       ) : null}
 
