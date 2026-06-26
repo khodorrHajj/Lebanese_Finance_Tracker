@@ -194,12 +194,14 @@ export default function DashboardPage() {
   const { locale } = useLanguage();
   const { user, refreshUser, setUserProfile } = useAuth();
   const hasRecordedInitialRateRefresh = useRef(false);
+  const initialLoadDoneRef = useRef(false);
   const [netWorth, setNetWorth] = useState<NetWorthData | null>(null);
   const [forecast, setForecast] = useState<ForecastData | null>(null);
   const [wallets, setWallets] = useState<Institution[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshingTransactions, setIsRefreshingTransactions] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [verificationOtp, setVerificationOtp] = useState("");
   const [verificationState, setVerificationState] = useState<string | null>(null);
@@ -294,6 +296,7 @@ export default function DashboardPage() {
       } finally {
         if (isMounted) {
           setLoading(false);
+          initialLoadDoneRef.current = true;
         }
       }
     }
@@ -303,7 +306,58 @@ export default function DashboardPage() {
     return () => {
       isMounted = false;
     };
-  }, [recentFilters.end_date, recentFilters.category_id, recentFilters.start_date, reloadToken]);
+  }, [reloadToken]);
+
+  useEffect(() => {
+    if (!initialLoadDoneRef.current) {
+      return;
+    }
+
+    let isMounted = true;
+    const maxAllowedDate = getTodayLocalDate();
+
+    async function refreshTransactions() {
+      setIsRefreshingTransactions(true);
+
+      try {
+        const transactionRows = await fetchTransactions({
+          status: "all",
+          start_date:
+            recentFilters.start_date && recentFilters.start_date <= maxAllowedDate
+              ? recentFilters.start_date
+              : undefined,
+          end_date:
+            recentFilters.end_date && recentFilters.end_date <= maxAllowedDate
+              ? recentFilters.end_date
+              : undefined,
+          category_id: recentFilters.category_id
+            ? Number(recentFilters.category_id)
+            : undefined,
+          page_size: 5,
+        });
+
+        if (!isMounted) {
+          return;
+        }
+
+        setRecentTransactions(transactionRows);
+      } catch {
+        if (isMounted) {
+          setError("load_failed");
+        }
+      } finally {
+        if (isMounted) {
+          setIsRefreshingTransactions(false);
+        }
+      }
+    }
+
+    void refreshTransactions();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [recentFilters.end_date, recentFilters.category_id, recentFilters.start_date]);
 
   useEffect(() => {
     if (verificationRetryAfterSeconds <= 0) {
@@ -908,7 +962,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="mt-6 space-y-3">
-          {loading
+          {loading || isRefreshingTransactions
             ? Array.from({ length: 5 }).map((_, i) => (
                 <article
                   key={i}
@@ -926,13 +980,13 @@ export default function DashboardPage() {
               ))
             : null}
 
-          {recentTransactions.length === 0 && !loading ? (
+          {recentTransactions.length === 0 && !loading && !isRefreshingTransactions ? (
             <div className="rounded-2xl border border-dashed border-[var(--border)] bg-slate-50 px-4 py-10 text-center text-sm text-[var(--muted)]">
               {t("no_transactions_found", locale)}
             </div>
           ) : null}
 
-          {!loading
+          {!loading && !isRefreshingTransactions
             ? recentTransactions.map((transaction) => (
                 <article
                   key={transaction.id}

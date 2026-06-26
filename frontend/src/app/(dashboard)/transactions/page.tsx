@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
   ClipboardCheck,
@@ -92,7 +92,9 @@ export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const initialLoadDoneRef = useRef(false);
   const [filters, setFilters] = useState<{
     status: StatusFilter;
     category_id: string;
@@ -145,6 +147,7 @@ export default function TransactionsPage() {
       } finally {
         if (isMounted) {
           setLoading(false);
+          initialLoadDoneRef.current = true;
         }
       }
     }
@@ -154,7 +157,48 @@ export default function TransactionsPage() {
     return () => {
       isMounted = false;
     };
-  }, [filters, reloadToken]);
+  }, [reloadToken]);
+
+  useEffect(() => {
+    if (!initialLoadDoneRef.current) {
+      return;
+    }
+
+    let isMounted = true;
+
+    async function refreshData() {
+      setIsRefreshing(true);
+
+      try {
+        const rows = await fetchTransactions({
+          status: filters.status,
+          category_id: filters.category_id ? Number(filters.category_id) : undefined,
+          start_date: filters.start_date || undefined,
+          end_date: filters.end_date || undefined,
+        });
+
+        if (!isMounted) {
+          return;
+        }
+
+        setTransactions(rows);
+      } catch {
+        if (isMounted) {
+          setError("load_failed");
+        }
+      } finally {
+        if (isMounted) {
+          setIsRefreshing(false);
+        }
+      }
+    }
+
+    void refreshData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [filters]);
 
   const pendingCount = useMemo(
     () => transactions.filter((transaction) => transaction.status === "pending").length,
@@ -522,7 +566,7 @@ export default function TransactionsPage() {
             </div>
           </div>
 
-          {loading ? (
+          {loading || isRefreshing ? (
             <div className="mt-6 rounded-2xl border border-[var(--border)] bg-white">
               <table className="min-w-full divide-y divide-[var(--border)]">
                 <thead className="bg-slate-50">
@@ -551,7 +595,7 @@ export default function TransactionsPage() {
             </div>
           ) : null}
 
-          {!loading && transactions.length > 0 ? (
+          {!loading && !isRefreshing && transactions.length > 0 ? (
             <>
               <div className="mt-6 hidden overflow-hidden rounded-2xl border border-[var(--border)] lg:block">
                 <table className="min-w-full divide-y divide-[var(--border)]">
@@ -752,7 +796,7 @@ export default function TransactionsPage() {
             </>
           ) : null}
 
-          {!loading && transactions.length === 0 ? (
+          {!loading && !isRefreshing && transactions.length === 0 ? (
             <div className="mt-6 rounded-2xl border border-dashed border-[var(--border)] bg-slate-50 px-4 py-10 text-center text-sm text-[var(--muted)]">
               {t("no_transactions_found", locale)}
             </div>
